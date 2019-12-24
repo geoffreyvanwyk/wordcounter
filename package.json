@@ -2,7 +2,12 @@
   "name": "@systemovich/wordcounter",
   "description": "A port to TypeScript of the built-in Bash utility command wc that prints newline, word, and byte counts for each file given as argument, and a total line if more than one file argument is specified. It is not intended as an alternative to the built-in command, but as practice in using the Oclif command line app framework.",
   "version": "0.0.0",
-  "author": "\"Geoffrey van Wyk <geoffrey@vanwyk.biz> (https://today-i-learned.blog)\"",
+  "author": {
+    "name": "Geoffrey van Wyk",
+    "email": "geoffrey@vanwyk.biz",
+    "url": "https://today-i-learned.blog"
+  },
+  "contributors": [],
   "bin": {
     "swc": "./bin/run"
   },
@@ -44,7 +49,7 @@
   "oclif": {
     "bin": "swc"
   },
-  "repository": "systemovich/wordcounter",
+  "repository": "https://github.com/systemovich/wordcounter",
   "scripts": {
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
