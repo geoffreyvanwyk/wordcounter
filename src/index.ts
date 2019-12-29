@@ -1,28 +1,54 @@
 import {Command, flags} from '@oclif/command'
 
 class SystemovichWordcounter extends Command {
-  static description = 'describe the command here'
+  static description = 'Print newline, word, and byte counts for each FILE.\n' +
+    'Also print total line if more than one FILE is specified.\n\n' +
+
+    'A word is a non-zero-length sequence of characters delimited by white ' +
+    'space.\n\n' +
+    'With no FILE, or when FILE is -, read standarc input.'
 
   static flags = {
-    // add --version flag to show CLI version
-    version: flags.version({char: 'v'}),
+    bytes: flags.boolean({
+      char: 'f',
+      description: 'print the byte counts',
+    }),
+
+    chars: flags.boolean({
+      char: 'm',
+      description: 'print the character counts',
+    }),
+
+    'files-from': flags.string({
+      description: 'read input from the file specified by NUL-terminated ' +
+        'names in file "files-from"; if "files-from" is - then read names ' +
+        'from standard input',
+    }),
+
     help: flags.help({char: 'h'}),
-    // flag with a value (-n, --name=VALUE)
-    name: flags.string({char: 'n', description: 'name to print'}),
-    // flag with no value (-f, --force)
-    force: flags.boolean({char: 'f'}),
+
+    lines: flags.boolean({
+      char: 'l',
+      description: 'print the newline counts',
+    }),
+
+    'max-line-length': flags.integer({
+      char: 'L',
+      description: 'print the maximum display width',
+    }),
+
+    version: flags.version({char: 'v'}),
+
+    words: flags.boolean({
+      char: 'w',
+      description: 'print the word counts',
+    }),
   }
 
   static args = [{name: 'file'}]
 
   async run() {
-    const {args, flags} = this.parse(SystemovichWordcounter)
-
-    const name = flags.name || 'world'
-    this.log(`hello ${name} from ./src/index.ts`)
-    if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`)
-    }
+    this.log('hello from ./src/index.ts')
   }
 }
 
