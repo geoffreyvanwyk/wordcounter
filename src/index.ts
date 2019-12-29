@@ -52,8 +52,16 @@ class SystemovichWordcounter extends Command {
   async run() {
     const {args, flags} = this.parse(SystemovichWordcounter)
 
-    if (flags.lines && args.file) {
-      this.log(await this.countLines(args.file))
+    if (args.file && flags.lines) {
+      let output = ''
+
+      try {
+        output = await this.countLines(args.file)
+      } catch (error) {
+        this.error(error)
+      }
+
+      this.log(output)
     }
   }
 
@@ -61,21 +69,20 @@ class SystemovichWordcounter extends Command {
     return new Promise((resolve, reject) => {
       let lines = 0
 
-      try {
-        const rl = readline.createInterface({
-          input: createReadStream(filepath),
-        })
+      const readStream = createReadStream(filepath)
+      readStream.on('error', error => reject(error))
 
-        rl.on('line', () => {
-          lines++
-        })
+      const rl = readline.createInterface({
+        input: readStream,
+      })
 
-        rl.on('close', () => {
-          resolve(lines.toString().concat(' ').concat(filepath))
-        })
-      } catch (error) {
-        reject(error)
-      }
+      rl.on('line', () => {
+        lines++
+      })
+
+      rl.on('close', () => {
+        resolve(lines.toString().concat(' ').concat(filepath))
+      })
     })
   }
 }
