@@ -52,6 +52,18 @@ class SystemovichWordcounter extends Command {
   async run() {
     const {args, flags} = this.parse(SystemovichWordcounter)
 
+    if (args.file && flags.lines) {
+      let output = ''
+
+      try {
+        output = await this.countLines(args.file)
+      } catch (error) {
+        this.error(error)
+      }
+
+      this.log(output)
+    }
+
     if (args.file && flags.words) {
       let output = ''
 
@@ -64,17 +76,38 @@ class SystemovichWordcounter extends Command {
       this.log(output)
     }
 
-    if (args.file && flags.lines) {
+    if (args.file && flags.chars) {
       let output = ''
 
       try {
-        output = await this.countLines(args.file)
+        output = await this.countCharacters(args.file)
       } catch (error) {
         this.error(error)
       }
 
       this.log(output)
     }
+  }
+
+  async countLines(filepath: string): Promise<string>  {
+    return new Promise((resolve, reject) => {
+      let lines = 0
+
+      const readStream = createReadStream(filepath)
+      readStream.on('error', error => reject(error))
+
+      const rl = readline.createInterface({
+        input: readStream,
+      })
+
+      rl.on('line', () => {
+        lines++
+      })
+
+      rl.on('close', () => {
+        resolve(lines.toString().concat(' ').concat(filepath))
+      })
+    })
   }
 
   async countWords(filepath: string): Promise<string>  {
@@ -102,8 +135,9 @@ class SystemovichWordcounter extends Command {
     })
   }
 
-  async countLines(filepath: string): Promise<string>  {
+  async countCharacters(filepath: string): Promise<string>  {
     return new Promise((resolve, reject) => {
+      let characters = 0
       let lines = 0
 
       const readStream = createReadStream(filepath)
@@ -113,12 +147,16 @@ class SystemovichWordcounter extends Command {
         input: readStream,
       })
 
-      rl.on('line', () => {
+      rl.on('line', line => {
         lines++
+
+        characters += line
+        .split('')
+        .length
       })
 
       rl.on('close', () => {
-        resolve(lines.toString().concat(' ').concat(filepath))
+        resolve((characters + lines).toString().concat(' ').concat(filepath))
       })
     })
   }

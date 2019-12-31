@@ -7,6 +7,26 @@ describe('@systemovich/wordcounter', () => {
   const blankFile = fixturesDir.concat('blank.txt')
   const testFile = fixturesDir.concat('testfile.txt')
 
+  describe('line counting', () => {
+    test
+    .stdout()
+    .do(() => cmd.run(['--lines', blankFile]))
+    .it('prints 0 for the newline count of a blank file', ctx => {
+      expect(ctx.stdout).to.equal(
+        (0).toString().concat(' ').concat(blankFile).concat('\n')
+      )
+    })
+
+    test
+    .stdout()
+    .do(() => cmd.run(['--lines', testFile]))
+    .it('prints the newline counts for a nonempty file', ctx => {
+      expect(ctx.stdout).to.equal(
+        (29).toString().concat(' ').concat(testFile).concat('\n')
+      )
+    })
+  })
+
   describe('word counting', () => {
     test
     .stdout()
@@ -27,11 +47,11 @@ describe('@systemovich/wordcounter', () => {
     })
   })
 
-  describe('line counting', () => {
+  describe('character counting', () => {
     test
     .stdout()
-    .do(() => cmd.run(['--lines', blankFile]))
-    .it('prints 0 for the newline count of a blank file', ctx => {
+    .do(() => cmd.run(['--chars', blankFile]))
+    .it('prints 0 for the character count of a blank file', ctx => {
       expect(ctx.stdout).to.equal(
         (0).toString().concat(' ').concat(blankFile).concat('\n')
       )
@@ -39,11 +59,12 @@ describe('@systemovich/wordcounter', () => {
 
     test
     .stdout()
-    .do(() => cmd.run(['--lines', testFile]))
-    .it('prints the newline counts for a nonempty file', ctx => {
+    .do(() => cmd.run(['--chars', testFile]))
+    .it('prints the character count for a nonempty file', ctx => {
       expect(ctx.stdout).to.equal(
-        (29).toString().concat(' ').concat(testFile).concat('\n')
+        (866).toString().concat(' ').concat(testFile).concat('\n')
       )
     })
   })
 })
+
