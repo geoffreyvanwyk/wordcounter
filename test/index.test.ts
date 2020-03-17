@@ -47,6 +47,26 @@ describe('@systemovich/wordcounter', () => {
     })
   })
 
+  describe('--bytes flag', () => {
+    test
+    .stdout()
+    .do(() => cmd.run(['--bytes', blankFile]))
+    .it('prints 0 for the character count of a blank file', ctx => {
+      expect(ctx.stdout).to.equal(
+        (0).toString().concat(' ').concat(blankFile).concat('\n')
+      )
+    })
+
+    test
+    .stdout()
+    .do(() => cmd.run(['--bytes', testFile]))
+    .it('prints the character count for a nonempty file', ctx => {
+      expect(ctx.stdout).to.equal(
+        (868).toString().concat(' ').concat(testFile).concat('\n')
+      )
+    })
+  })
+
   describe('--chars flag', () => {
     test
     .stdout()

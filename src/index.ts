@@ -1,6 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import {createReadStream} from 'fs'
 import * as readline from 'readline'
+import {Buffer} from 'buffer'
 
 class SystemovichWordcounter extends Command {
   static description = 'Print newline, word, and byte counts for each FILE.\n' +
@@ -12,7 +13,7 @@ class SystemovichWordcounter extends Command {
 
   static flags = {
     bytes: flags.boolean({
-      char: 'f',
+      char: 'c',
       description: 'print the byte counts',
     }),
 
@@ -76,6 +77,18 @@ class SystemovichWordcounter extends Command {
       this.log(output)
     }
 
+    if (args.file && flags.bytes) {
+      let output = ''
+
+      try {
+        output = await this.countBytes(args.file)
+      } catch (error) {
+        this.error(error)
+      }
+
+      this.log(output)
+    }
+
     if (args.file && flags.chars) {
       let output = ''
 
@@ -131,6 +144,29 @@ class SystemovichWordcounter extends Command {
 
       rl.on('close', () => {
         resolve(words.toString().concat(' ').concat(filepath))
+      })
+    })
+  }
+
+  async countBytes(filepath: string): Promise<string>  {
+    return new Promise((resolve, reject) => {
+      let bytes = 0
+      let lines = 0
+
+      const readStream = createReadStream(filepath)
+      readStream.on('error', error => reject(error))
+
+      const rl = readline.createInterface({
+        input: readStream,
+      })
+
+      rl.on('line', line => {
+        lines++
+        bytes += Buffer.byteLength(line)
+      })
+
+      rl.on('close', () => {
+        resolve((bytes + lines).toString().concat(' ').concat(filepath))
       })
     })
   }
