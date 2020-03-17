@@ -7,7 +7,7 @@ describe('@systemovich/wordcounter', () => {
   const blankFile = fixturesDir.concat('blank.txt')
   const testFile = fixturesDir.concat('testfile.txt')
 
-  describe('line counting', () => {
+  describe('--lines flag', () => {
     test
     .stdout()
     .do(() => cmd.run(['--lines', blankFile]))
@@ -27,7 +27,7 @@ describe('@systemovich/wordcounter', () => {
     })
   })
 
-  describe('word counting', () => {
+  describe('--words flag', () => {
     test
     .stdout()
     .do(() => cmd.run(['--words', blankFile]))
@@ -47,7 +47,7 @@ describe('@systemovich/wordcounter', () => {
     })
   })
 
-  describe('character counting', () => {
+  describe('--chars flag', () => {
     test
     .stdout()
     .do(() => cmd.run(['--chars', blankFile]))
@@ -67,4 +67,3 @@ describe('@systemovich/wordcounter', () => {
     })
   })
 })
-
