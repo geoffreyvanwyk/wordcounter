@@ -28,6 +28,13 @@ class SystemovichWordcounter extends Command {
         'from standard input',
     }),
 
+    file: flags.string({
+      char: 'f',
+      description: 'one or more files in which to count items',
+      multiple: true,
+      required: true,
+    }),
+
     help: flags.help({char: 'h'}),
 
     lines: flags.boolean({
@@ -48,57 +55,47 @@ class SystemovichWordcounter extends Command {
     }),
   }
 
-  static args = [{name: 'file'}]
-
   async run() {
-    const {args, flags} = this.parse(SystemovichWordcounter)
+    const {flags} = this.parse(SystemovichWordcounter)
 
-    if (args.file && flags.lines) {
-      let output = ''
-
+    if (flags.lines) {
       try {
-        output = await this.countLines(args.file)
+        this.log((await Promise.all(
+          flags.file.map(file => this.countLines(file))
+        )).join('\n'))
       } catch (error) {
         this.error(error)
       }
-
-      this.log(output)
     }
 
-    if (args.file && flags.words) {
-      let output = ''
-
+    if (flags.words) {
       try {
-        output = await this.countWords(args.file)
+        this.log((await Promise.all(
+          flags.file.map(file => this.countWords(file))
+        )).join('\n'))
       } catch (error) {
         this.error(error)
       }
-
-      this.log(output)
     }
 
-    if (args.file && flags.bytes) {
-      let output = ''
-
+    if (flags.bytes) {
       try {
-        output = await this.countBytes(args.file)
+        this.log((await Promise.all(
+          flags.file.map(file => this.countBytes(file))
+        )).join('\n'))
       } catch (error) {
         this.error(error)
       }
-
-      this.log(output)
     }
 
-    if (args.file && flags.chars) {
-      let output = ''
-
+    if (flags.chars) {
       try {
-        output = await this.countCharacters(args.file)
+        this.log((await Promise.all(
+          flags.file.map(file => this.countCharacters(file))
+        )).join('\n'))
       } catch (error) {
         this.error(error)
       }
-
-      this.log(output)
     }
   }
 
