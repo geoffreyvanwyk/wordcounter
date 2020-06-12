@@ -103,18 +103,13 @@ class SystemovichWordcounter extends Command {
     return new Promise((resolve, reject) => {
       let lines = 0
 
-      const readStream = createReadStream(filepath)
-      readStream.on('error', error => reject(error))
-
-      const rl = readline.createInterface({
-        input: readStream,
+      readline.createInterface({
+        input: createReadStream(filepath).on('error', error => reject(error)),
       })
-
-      rl.on('line', () => {
+      .on('line', () => {
         lines++
       })
-
-      rl.on('close', () => {
+      .on('close', () => {
         resolve(lines.toString().concat(' ').concat(filepath))
       })
     })
@@ -124,22 +119,17 @@ class SystemovichWordcounter extends Command {
     return new Promise((resolve, reject) => {
       let words = 0
 
-      const readStream = createReadStream(filepath)
-      readStream.on('error', error => reject(error))
-
-      const rl = readline.createInterface({
-        input: readStream,
+      readline.createInterface({
+        input: createReadStream(filepath).on('error', error => reject(error)),
       })
-
-      rl.on('line', line => {
+      .on('line', line => {
         words += line
         .split(' ')
         .map(word => word.trim())
         .filter(word => word !== '')
         .length
       })
-
-      rl.on('close', () => {
+      .on('close', () => {
         resolve(words.toString().concat(' ').concat(filepath))
       })
     })
@@ -150,19 +140,14 @@ class SystemovichWordcounter extends Command {
       let bytes = 0
       let lines = 0
 
-      const readStream = createReadStream(filepath)
-      readStream.on('error', error => reject(error))
-
-      const rl = readline.createInterface({
-        input: readStream,
+      readline.createInterface({
+        input: createReadStream(filepath).on('error', error => reject(error)),
       })
-
-      rl.on('line', line => {
+      .on('line', line => {
         lines++
         bytes += Buffer.byteLength(line)
       })
-
-      rl.on('close', () => {
+      .on('close', () => {
         resolve((bytes + lines).toString().concat(' ').concat(filepath))
       })
     })
@@ -173,22 +158,17 @@ class SystemovichWordcounter extends Command {
       let characters = 0
       let lines = 0
 
-      const readStream = createReadStream(filepath)
-      readStream.on('error', error => reject(error))
-
-      const rl = readline.createInterface({
-        input: readStream,
+      readline.createInterface({
+        input: createReadStream(filepath).on('error', error => reject(error)),
       })
-
-      rl.on('line', line => {
+      .on('line', line => {
         lines++
 
         characters += line
         .split('')
         .length
       })
-
-      rl.on('close', () => {
+      .on('close', () => {
         resolve((characters + lines).toString().concat(' ').concat(filepath))
       })
     })
