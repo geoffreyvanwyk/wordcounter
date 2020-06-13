@@ -1,7 +1,6 @@
 import {Command, flags} from '@oclif/command'
-import {createReadStream} from 'fs'
-import * as readline from 'readline'
-import {Buffer} from 'buffer'
+import cli from 'cli-ux'
+import WordCounter from './word-counter'
 
 class SystemovichWordcounter extends Command {
   static description = 'Print newline, word, and byte counts for each FILE.\n' +
@@ -55,14 +54,30 @@ class SystemovichWordcounter extends Command {
     }),
   }
 
+  wordCounters: Array<WordCounter> = []
+
   async run() {
+    this.prepareCounters()
+    await this.collectCounts()
+    this.logCounts()
+  }
+
+  async prepareCounters() {
+    const {flags} = this.parse(SystemovichWordcounter)
+
+    for (const file of flags.file) {
+      this.wordCounters.push(new WordCounter(file))
+    }
+  }
+
+  async collectCounts() {
     const {flags} = this.parse(SystemovichWordcounter)
 
     if (flags.lines) {
       try {
-        this.log((await Promise.all(
-          flags.file.map(file => this.countLines(file))
-        )).join('\n'))
+        await Promise.all(
+          this.wordCounters.map(wordCounter => wordCounter.lines())
+        )
       } catch (error) {
         this.error(error)
       }
@@ -70,9 +85,9 @@ class SystemovichWordcounter extends Command {
 
     if (flags.words) {
       try {
-        this.log((await Promise.all(
-          flags.file.map(file => this.countWords(file))
-        )).join('\n'))
+        await Promise.all(
+          this.wordCounters.map(wordCounter => wordCounter.words())
+        )
       } catch (error) {
         this.error(error)
       }
@@ -80,9 +95,9 @@ class SystemovichWordcounter extends Command {
 
     if (flags.bytes) {
       try {
-        this.log((await Promise.all(
-          flags.file.map(file => this.countBytes(file))
-        )).join('\n'))
+        await Promise.all(
+          this.wordCounters.map(wordCounter => wordCounter.bytes())
+        )
       } catch (error) {
         this.error(error)
       }
@@ -90,88 +105,47 @@ class SystemovichWordcounter extends Command {
 
     if (flags.chars) {
       try {
-        this.log((await Promise.all(
-          flags.file.map(file => this.countCharacters(file))
-        )).join('\n'))
+        await Promise.all(
+          this.wordCounters.map(wordCounter => wordCounter.chars())
+        )
       } catch (error) {
         this.error(error)
       }
     }
+
+    if (!flags.lines && !flags.words && !flags.bytes && !flags.chars) {
+      try {
+        await Promise.all(
+          this.wordCounters.map(wordCounter => wordCounter.all())
+        )
+      } catch (error) {
+        error(error)
+      }
+    }
   }
 
-  async countLines(filepath: string): Promise<string>  {
-    return new Promise((resolve, reject) => {
-      let lines = 0
+  async logCounts() {
+    const {flags} = this.parse(SystemovichWordcounter)
+    const data = this.wordCounters.map(wordCounter => wordCounter.counts)
 
-      readline.createInterface({
-        input: createReadStream(filepath).on('error', error => reject(error)),
-      })
-      .on('line', () => {
-        lines++
-      })
-      .on('close', () => {
-        resolve(lines.toString().concat(' ').concat(filepath))
-      })
-    })
-  }
+    const columns =  {
+      lines: {},
+      words: {},
+      bytes: {},
+      chars: {},
+      file: {},
+    }
 
-  async countWords(filepath: string): Promise<string>  {
-    return new Promise((resolve, reject) => {
-      let words = 0
+    const options = {}
 
-      readline.createInterface({
-        input: createReadStream(filepath).on('error', error => reject(error)),
-      })
-      .on('line', line => {
-        words += line
-        .split(' ')
-        .map(word => word.trim())
-        .filter(word => word !== '')
-        .length
-      })
-      .on('close', () => {
-        resolve(words.toString().concat(' ').concat(filepath))
-      })
-    })
-  }
+    const all = !flags.lines && !flags.words && !flags.bytes && !flags.chars
 
-  async countBytes(filepath: string): Promise<string>  {
-    return new Promise((resolve, reject) => {
-      let bytes = 0
-      let lines = 0
+    if (!flags.lines && !all) delete columns.lines
+    if (!flags.words && !all) delete columns.words
+    if (!flags.bytes && !all) delete columns.bytes
+    if (!flags.chars && !all) delete columns.chars
 
-      readline.createInterface({
-        input: createReadStream(filepath).on('error', error => reject(error)),
-      })
-      .on('line', line => {
-        lines++
-        bytes += Buffer.byteLength(line)
-      })
-      .on('close', () => {
-        resolve((bytes + lines).toString().concat(' ').concat(filepath))
-      })
-    })
-  }
-
-  async countCharacters(filepath: string): Promise<string>  {
-    return new Promise((resolve, reject) => {
-      let characters = 0
-      let lines = 0
-
-      readline.createInterface({
-        input: createReadStream(filepath).on('error', error => reject(error)),
-      })
-      .on('line', line => {
-        lines++
-
-        characters += line
-        .split('')
-        .length
-      })
-      .on('close', () => {
-        resolve((characters + lines).toString().concat(' ').concat(filepath))
-      })
-    })
+    cli.table(data, columns, options)
   }
 }
 
